@@ -1,8 +1,12 @@
 {
   "name": "medusa-plugin-localization",
   "version": "0.0.1",
-  "description": "A starter for Medusa plugins.",
-  "author": "Medusa (https://medusajs.com)",
+  "description": "Meudsa localization plugin, supports deepseek automatic translation",
+  "author": "SummerFans (https://github.com/SummerFans)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SummerFans/medusa-plugin-localization"
+  },
   "license": "MIT",
   "files": [
     ".medusa/server"
@@ -25,7 +29,9 @@
     "plugin",
     "medusa-plugin-other",
     "medusa-plugin",
-    "medusa-v2"
+    "medusa-v2",
+    "localization",
+    "deepseek"
   ],
   "scripts": {
     "dev": "medusa develop",
