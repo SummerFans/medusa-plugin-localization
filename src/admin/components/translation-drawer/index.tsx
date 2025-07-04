@@ -40,6 +40,7 @@ export default function TranslationDrawer() {
       try {
         const res = await fetch(`${__BACKEND_URL__||''}/admin/plugin/localization`, {
           method: 'POST',
+          credentials:'include',
           headers: {
             "content-type": "application/json"
           },

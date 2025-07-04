@@ -55,6 +55,7 @@ export default function ProductDrawer() {
       try {
         const res = await fetch(`${__BACKEND_URL__||''}/admin/plugin/localization/${id}`, {
           method: 'POST',
+          credentials:'include',
           headers: {
             "content-type": "application/json"
           },
@@ -82,6 +83,7 @@ export default function ProductDrawer() {
     setLoading(true)
     const res = await fetch(`${__BACKEND_URL__||''}/admin/plugin/localization/${id}?type=product`, {
       method: 'PUT',
+      credentials:'include',
       headers: {
         "content-type": "application/json"
       },
