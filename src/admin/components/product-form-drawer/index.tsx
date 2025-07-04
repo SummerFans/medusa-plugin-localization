@@ -7,6 +7,8 @@ import { useEffect, useRef, useState } from "react";
 import DeepseekIcon from "../../icons/deepseek";
 import { convertingMetadataVal, optionsTransform } from "../../utils";
 
+declare const __BACKEND_URL__: string;
+
 const schema = zod.object({
   locale: zod.string(),
   title: zod.string(),
@@ -51,7 +53,7 @@ export default function ProductDrawer() {
     if (confirmed) {
       setLoading(true)
       try {
-        const res = await fetch(`/admin/plugin/localization/${id}`, {
+        const res = await fetch(`${__BACKEND_URL__||''}/admin/plugin/localization/${id}`, {
           method: 'POST',
           headers: {
             "content-type": "application/json"
@@ -78,7 +80,7 @@ export default function ProductDrawer() {
 
   const handleSubmit = form.handleSubmit(async (data) => {
     setLoading(true)
-    const res = await fetch(`/admin/plugin/localization/${id}?type=product`, {
+    const res = await fetch(`${__BACKEND_URL__||''}/admin/plugin/localization/${id}?type=product`, {
       method: 'PUT',
       headers: {
         "content-type": "application/json"

@@ -4,6 +4,9 @@ import DeepseekIcon from "../../icons/deepseek";
 import { useLocalization } from "../../context/locale-context";
 import Flag from 'react-country-flag'
 
+declare const __BACKEND_URL__: string;
+
+
 export default function TranslationDrawer() {
 
   const dialog = usePrompt();
@@ -35,7 +38,7 @@ export default function TranslationDrawer() {
     if (confirm) {
       setLoading(true);
       try {
-        const res = await fetch(`/admin/plugin/localization`, {
+        const res = await fetch(`${__BACKEND_URL__||''}/admin/plugin/localization`, {
           method: 'POST',
           headers: {
             "content-type": "application/json"
