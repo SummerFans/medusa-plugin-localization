@@ -84,11 +84,5 @@
   },
   "engines": {
     "node": ">=20"
-  },
-  "dependencies": {
-    "@types/js-cookie": "^3.0.6",
-    "js-cookie": "^3.0.5",
-    "medusa-plugin-localization": "file:.yalc/medusa-plugin-localization",
-    "react-country-flag": "^3.1.0"
   }
 }
