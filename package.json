@@ -1,6 +1,6 @@
 {
   "name": "medusa-plugin-localization",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Meudsa localization plugin, supports deepseek automatic translation",
   "author": "SummerFans (https://github.com/SummerFans)",
   "repository": {
@@ -34,9 +34,9 @@
     "deepseek"
   ],
   "scripts": {
-    "dev": "medusa develop",
     "build": "medusa plugin:build",
-    "dev:plugin": "medusa plugin:develop",
+    "dev": "medusa plugin:develop",
+    "dev:srv": "medusa develop",
     "prepublishOnly": "medusa plugin:build"
   },
   "devDependencies": {
@@ -88,6 +88,7 @@
   "dependencies": {
     "@types/js-cookie": "^3.0.6",
     "js-cookie": "^3.0.5",
+    "medusa-plugin-localization": "file:.yalc/medusa-plugin-localization",
     "react-country-flag": "^3.1.0"
   }
 }

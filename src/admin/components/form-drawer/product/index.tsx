@@ -2,10 +2,10 @@ import { PencilSquare } from "@medusajs/icons";
 import { Drawer, IconButton, Button, Label, Input, Textarea, Badge, usePrompt, clx, toast } from "@medusajs/ui";
 import { Controller, FormProvider, useForm, useFieldArray } from "react-hook-form"
 import * as zod from "zod"
-import { useLocalization } from "../../context/locale-context";
+import { useLocalization } from "../../../context/locale-context";
 import { useEffect, useRef, useState } from "react";
-import DeepseekIcon from "../../icons/deepseek";
-import { convertingMetadataVal, optionsTransform } from "../../utils";
+import DeepseekIcon from "../../../icons/deepseek";
+import { convertingMetadataVal, optionsTransform } from "../../../utils";
 
 declare const __BACKEND_URL__: string;
 
@@ -18,7 +18,7 @@ const schema = zod.object({
   options: zod.any(),
 })
 
-export default function ProductDrawer() {
+export default function ProductFormDrawer() {
 
   const dialog = usePrompt()
 
@@ -53,9 +53,9 @@ export default function ProductDrawer() {
     if (confirmed) {
       setLoading(true)
       try {
-        const res = await fetch(`${__BACKEND_URL__||''}/admin/plugin/localization/${id}`, {
+        const res = await fetch(`${__BACKEND_URL__ || ''}/admin/plugin/localization/${id}`, {
           method: 'POST',
-          credentials:'include',
+          credentials: 'include',
           headers: {
             "content-type": "application/json"
           },
@@ -81,9 +81,9 @@ export default function ProductDrawer() {
 
   const handleSubmit = form.handleSubmit(async (data) => {
     setLoading(true)
-    const res = await fetch(`${__BACKEND_URL__||''}/admin/plugin/localization/${id}?type=product`, {
+    const res = await fetch(`${__BACKEND_URL__ || ''}/admin/plugin/localization/${id}?type=product`, {
       method: 'PUT',
-      credentials:'include',
+      credentials: 'include',
       headers: {
         "content-type": "application/json"
       },

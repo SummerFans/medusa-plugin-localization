@@ -11,7 +11,7 @@ export default function TranslationDrawer() {
 
   const dialog = usePrompt();
   const dialogRef = useRef<HTMLButtonElement>(null);
-  const { id, countries, defaultLocale, setMetadataLocale } = useLocalization()
+  const { id, type, countries, defaultLocale, setMetadataLocale } = useLocalization()
 
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
@@ -29,8 +29,8 @@ export default function TranslationDrawer() {
 
   }
 
-  const translationHandle = async () => {
-
+  const translationHandle = async (e: any) => {
+    e.stopPropagation();
     const confirm = await dialog({
       title: "Are you sure?",
       description: `Are you sure you can translate into ${selected.length} languages?`
@@ -38,13 +38,13 @@ export default function TranslationDrawer() {
     if (confirm) {
       setLoading(true);
       try {
-        const res = await fetch(`${__BACKEND_URL__||''}/admin/plugin/localization`, {
+        const res = await fetch(`${__BACKEND_URL__ || ''}/admin/plugin/localization`, {
           method: 'POST',
-          credentials:'include',
+          credentials: 'include',
           headers: {
             "content-type": "application/json"
           },
-          body: JSON.stringify({ id, locales: selected })
+          body: JSON.stringify({ id, locales: selected, type })
         })
 
         const { message, data } = await res.json();

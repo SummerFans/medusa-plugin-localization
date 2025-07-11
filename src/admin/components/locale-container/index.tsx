@@ -1,6 +1,6 @@
 import { Container, Heading } from "@medusajs/ui";
 import LocaleSwitch from "../locale-switch";
-import ProductDrawer from "../product-form-drawer";
+import FormDrawer from "../form-drawer";
 import LocaleTable from "../locale-table";
 import SettingDrawer from "../setting-drawer";
 import { useLocalization } from "../../context/locale-context";
@@ -20,7 +20,7 @@ export default function LocaleContainer() {
             <>
               <TranslationDrawer />
               <LocaleSwitch />
-              <ProductDrawer />
+              <FormDrawer />
             </>
           )}
           <SettingDrawer />

@@ -8,6 +8,7 @@ import { AdminProductOption } from '@medusajs/framework/types';
 const DEFAULT_COOKIE_NAME = '_default_locale';
 
 interface LocaleContext {
+  type: 'collection' | 'categories' | 'product';
   defaultLocale: string | undefined;
   changeDefaultLocale: (locale: string) => void;
   id: string;
@@ -22,6 +23,7 @@ interface LocaleContext {
 }
 
 const LocalizationContext = createContext<LocaleContext>({
+  type: 'product',
   defaultLocale: 'en-US',
   id: '',
   source: '',    // metadata.locale
@@ -41,6 +43,7 @@ const LocalizationContext = createContext<LocaleContext>({
 })
 
 interface LocalizationProviderProps {
+  type: 'collection' | 'categories' | 'product'
   id: string;
   children: React.ReactNode;
   source: string | null;
@@ -55,6 +58,7 @@ export interface Countrie {
 }
 
 export const LocalizationProvider = ({
+  type,
   id,
   source,
   children,
@@ -119,13 +123,10 @@ export const LocalizationProvider = ({
       setTranslation(localeTransform(metadataLocale)[currentLocale?.locale] as any)
     }
 
-    // 可能变更的字段
-    // metadataLocale 翻译完成后替换原有metadata
-
   }, [metadataLocale])
 
   return (
-    <LocalizationContext.Provider value={{ options, metadataLocale, defaultLocale, changeDefaultLocale, id, source, currentLocale, changeLocale, setMetadataLocale, countries, translation }}>{children}</LocalizationContext.Provider>
+    <LocalizationContext.Provider value={{ options, metadataLocale, defaultLocale, type, changeDefaultLocale, id, source, currentLocale, changeLocale, setMetadataLocale, countries, translation }}>{children}</LocalizationContext.Provider>
   )
 }
 

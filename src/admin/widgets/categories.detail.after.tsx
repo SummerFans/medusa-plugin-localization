@@ -1,15 +1,16 @@
 import { defineWidgetConfig } from "@medusajs/admin-sdk"
 import { DetailWidgetProps, AdminProduct } from "@medusajs/framework/types"
-import LocaleContainer from "../components/locale-container"
-import { LocalizationProvider } from "../context/locale-context"
+import { LocalizationProvider } from "../context/locale-context";
+import LocaleContainer from "../components/locale-container";
 
 // The widget
 const ProductDetailWidget = ({ data }: DetailWidgetProps<AdminProduct>) => {
 
   const locale = data.metadata && data.metadata.locale ? data.metadata.locale as string : null
+  
 
   return (
-    <LocalizationProvider type="product" id={data.id} source={locale} options={data.options}>
+    <LocalizationProvider type="categories" id={data.id} source={locale} options={data.options}>
       <LocaleContainer />
     </LocalizationProvider>
   )
@@ -17,7 +18,7 @@ const ProductDetailWidget = ({ data }: DetailWidgetProps<AdminProduct>) => {
 
 // The widget's configurations
 export const config = defineWidgetConfig({
-  zone: "product.details.after"
+  zone: "product_category.details.after"
 })
 
 export default ProductDetailWidget

@@ -1,7 +1,7 @@
 import { MedusaError, Modules } from "@medusajs/framework/utils"
 import { ProductDTO } from '@medusajs/framework/types';
 import { createStep, createWorkflow, StepResponse, WorkflowResponse } from "@medusajs/framework/workflows-sdk"
-import { GetProductStepInput, GenerateMetadataLocaleStepInput, UpdateProductMetadataWorkflowInput, UpdateProductMetadataStepInput } from "./types"
+import { GenerateMetadataLocaleStepInput, UpdateProductMetadataWorkflowInput, UpdateProductMetadataStepInput } from "./types"
 import { DEEPSEEK_MODULE } from "../modules/deepseek";
 import DeepSeekModuleService from "../modules/deepseek/service";
 import { getProduct } from "./update-product-metadata";

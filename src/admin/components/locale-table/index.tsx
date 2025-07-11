@@ -3,13 +3,9 @@ import { useLocalization } from '../../context/locale-context';
 import { InformationCircle } from "@medusajs/icons";
 import Flag from "react-country-flag";
 import { useState } from "react";
-import Cookies from 'js-cookie';
 
-export default function LocaleTable() {
-
-  const { translation, defaultLocale } = useLocalization();
-
-  return translation && defaultLocale ? (
+const ProductTable = ({ translation }: any) => {
+  return (
     <Table className="w-full">
       <Table.Header>
         <Table.Row>
@@ -51,8 +47,73 @@ export default function LocaleTable() {
         ))}
 
       </Table.Body>
+    </Table>)
+}
+
+const CollectionTable = ({ translation }: any) => {
+  return (
+    <Table className="w-full">
+      <Table.Header>
+        <Table.Row>
+          <Table.HeaderCell width={150}>Fields</Table.HeaderCell>
+          <Table.HeaderCell>Translation</Table.HeaderCell>
+        </Table.Row>
+      </Table.Header>
+      <Table.Body>
+
+        <Table.Row>
+          <Table.Cell>Title</Table.Cell>
+          <Table.Cell className="py-2" >{translation.title}</Table.Cell>
+        </Table.Row>
+      </Table.Body>
     </Table>
-  ) : (defaultLocale ? <NotLocalization /> : <NotDefaultLocalization />)
+
+  )
+}
+
+const CategoriesTable = ({ translation }: any) => {
+  return (
+    <Table className="w-full">
+      <Table.Header>
+        <Table.Row>
+          <Table.HeaderCell width={150}>Fields</Table.HeaderCell>
+          <Table.HeaderCell>Translation</Table.HeaderCell>
+        </Table.Row>
+      </Table.Header>
+      <Table.Body>
+
+        <Table.Row>
+          <Table.Cell>Title</Table.Cell>
+          <Table.Cell className="py-2" dir="auto">{translation.title}</Table.Cell>
+        </Table.Row>
+      </Table.Body>
+    </Table>
+
+  )
+}
+
+export default function LocaleTable() {
+
+  const { translation, defaultLocale, type } = useLocalization();
+
+  if (!translation || !defaultLocale) {
+    if (defaultLocale) {
+      return <NotLocalization />
+    }
+    return <NotDefaultLocalization />
+  }
+
+  switch (type) {
+    case 'product':
+      return <ProductTable translation={translation} />
+    case 'collection':
+      return <CollectionTable translation={translation} />
+    case 'categories':
+      return <CategoriesTable translation={translation} />
+  }
+
+
+
 }
 
 function NotLocalization() {

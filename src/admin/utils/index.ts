@@ -89,7 +89,7 @@ const localeTransform = (locale: string | null): Record<string, unknown> => {
 
 const convertingMetadataVal = (data: any): MatadataLocaleData => {
 
-  const result: TransformedData = {
+  const result: any = {
     [data.locale]: {
       title: data.title,
       subtitle: data.subtitle,
@@ -101,7 +101,7 @@ const convertingMetadataVal = (data: any): MatadataLocaleData => {
 
   if (data.options) {
     data.options.forEach((option: any) => {
-      const transformedOption: TransformedOption = {
+      const transformedOption: any = {
         [option.id]: option.name,
         values: {},
       };
