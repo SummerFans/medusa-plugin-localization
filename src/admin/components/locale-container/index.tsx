@@ -5,10 +5,18 @@ import LocaleTable from "../locale-table";
 import SettingDrawer from "../setting-drawer";
 import { useLocalization } from "../../context/locale-context";
 import TranslationDrawer from "../translation-drawer";
+import { useNavigate } from 'react-router-dom';
+
 
 export default function LocaleContainer() {
 
+  const navigate = useNavigate();
+
   const { defaultLocale } = useLocalization();
+
+  const reload = () => {
+    navigate(0)
+  }
 
   return (
     <Container className="divide-y p-0">
@@ -18,9 +26,9 @@ export default function LocaleContainer() {
         <div className="flex">
           {defaultLocale && (
             <>
-              <TranslationDrawer />
+              <TranslationDrawer reload={reload} />
               <LocaleSwitch />
-              <FormDrawer />
+              <FormDrawer reload={reload} />
             </>
           )}
           <SettingDrawer />

@@ -3,8 +3,7 @@ import { ProductCollectionDTO } from '@medusajs/framework/types';
 import { createStep, createWorkflow, StepResponse, WorkflowResponse } from "@medusajs/framework/workflows-sdk"
 import { DEEPSEEK_MODULE } from "../modules/deepseek";
 import DeepSeekModuleService from "../modules/deepseek/service";
-import { updateProductMetadataLocale } from "./generate-product-metadata";
-import { getCollection } from "./steps/collection-step";
+import { getCollection, updateCollectionMetadataLocale } from "./steps/collection-step";
 
 const generateAllMetadataLocale = createStep(
   'generate-all-collection-metadata-locale',
@@ -72,7 +71,7 @@ const generateAllCollectionMetadata = createWorkflow(
     const metadata = generateAllMetadataLocale({ collection, locales })
 
     // step 3 update product metadata
-    return new WorkflowResponse(updateProductMetadataLocale({
+    return new WorkflowResponse(updateCollectionMetadataLocale({
       id,
       metadata,
     }))

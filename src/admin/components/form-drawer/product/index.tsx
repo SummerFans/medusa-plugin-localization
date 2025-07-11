@@ -18,7 +18,7 @@ const schema = zod.object({
   options: zod.any(),
 })
 
-export default function ProductFormDrawer() {
+export default function ProductFormDrawer({ reload }: { reload: () => void }) {
 
   const dialog = usePrompt()
 
@@ -68,6 +68,7 @@ export default function ProductFormDrawer() {
           return toast.error(message)
         }
         setMetadataLocale(data.metadata.locale)
+        reload();
         dialogRef.current?.click()
       } catch (e: unknown) {
         setLoading(false)
@@ -93,6 +94,7 @@ export default function ProductFormDrawer() {
     const jsonData = await res.json();
     setMetadataLocale(jsonData.data.metadata.locale)
     setLoading(false)
+    reload();
     dialogRef.current?.click()
 
   })

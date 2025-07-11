@@ -83,8 +83,13 @@ const CategoriesTable = ({ translation }: any) => {
       <Table.Body>
 
         <Table.Row>
-          <Table.Cell>Title</Table.Cell>
-          <Table.Cell className="py-2" dir="auto">{translation.title}</Table.Cell>
+          <Table.Cell>Name</Table.Cell>
+          <Table.Cell className="py-2">{translation.name}</Table.Cell>
+        </Table.Row>
+
+        <Table.Row>
+          <Table.Cell>Description</Table.Cell>
+          <Table.Cell className="py-2">{translation.description}</Table.Cell>
         </Table.Row>
       </Table.Body>
     </Table>
@@ -93,6 +98,7 @@ const CategoriesTable = ({ translation }: any) => {
 }
 
 export default function LocaleTable() {
+
 
   const { translation, defaultLocale, type } = useLocalization();
 

@@ -7,7 +7,7 @@ import Flag from 'react-country-flag'
 declare const __BACKEND_URL__: string;
 
 
-export default function TranslationDrawer() {
+export default function TranslationDrawer({ reload }: { reload: () => void }) {
 
   const dialog = usePrompt();
   const dialogRef = useRef<HTMLButtonElement>(null);
@@ -54,6 +54,7 @@ export default function TranslationDrawer() {
         }
         setMetadataLocale(data.metadata.locale)
         dialogRef.current?.click()
+        reload();
       } catch (e: unknown) {
         setLoading(false)
         if (e instanceof Error) {

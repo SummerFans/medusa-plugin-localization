@@ -1,4 +1,4 @@
-import { Modules } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { ProductCategoryDTO } from "@medusajs/framework/types"
 import { createStep, StepResponse } from "@medusajs/framework/workflows-sdk"
 
@@ -8,7 +8,9 @@ export const getCategories = createStep(
 
     const productModuleService = container.resolve(Modules.PRODUCT)
 
-    const categories = await productModuleService.retrieveProductCategory(id)
+    const categories = await productModuleService.retrieveProductCategory(id, {
+      relations: ['*']
+    })
 
     return new StepResponse(categories)
   }

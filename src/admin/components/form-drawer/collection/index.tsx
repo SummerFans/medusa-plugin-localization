@@ -14,7 +14,7 @@ const schema = zod.object({
   title: zod.string(),
 })
 
-export default function CollectionFormDrawer() {
+export default function CollectionFormDrawer({ reload }: { reload: () => void }) {
 
   const dialog = usePrompt()
   const dialogRef = useRef<HTMLButtonElement>(null);
@@ -34,14 +34,14 @@ export default function CollectionFormDrawer() {
   }, [translation])
 
 
-  const handleDeepseek = async (e:any) => {
-    e.stopPropagation()
+  const handleDeepseek = async (e: any) => {
     const confirmed = await dialog({
       title: "Are you sure?",
       description: "Please confirm this action",
     })
 
     if (confirmed) {
+      e.stopPropagation()
       try {
         setLoading(true)
         const res = await fetch(`${__BACKEND_URL__ || ''}/admin/plugin/localization/${id}`, {
@@ -60,6 +60,7 @@ export default function CollectionFormDrawer() {
         }
 
         setMetadataLocale(data.metadata.locale)
+        reload();
         dialogRef.current?.click()
       } catch (e: unknown) {
         setLoading(false)
@@ -87,6 +88,7 @@ export default function CollectionFormDrawer() {
           metadata: collection.metadata,
         })
         setLoading(false)
+        reload();
         dialogRef.current?.click()
       } catch (e) {
         setLoading(false)
