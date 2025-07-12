@@ -26,7 +26,7 @@ export default function ProductFormDrawer({ reload }: { reload: () => void }) {
 
   const [loading, setLoading] = useState(false);
 
-  const { id, options, currentLocale, translation, setMetadataLocale } = useLocalization();
+  const { id, type, options, currentLocale, translation, setMetadataLocale } = useLocalization();
 
   const form = useForm<zod.infer<typeof schema>>({
     defaultValues: {
@@ -59,7 +59,7 @@ export default function ProductFormDrawer({ reload }: { reload: () => void }) {
           headers: {
             "content-type": "application/json"
           },
-          body: JSON.stringify({ locale: currentLocale?.locale })
+          body: JSON.stringify({ locale: currentLocale?.locale, type })
         })
 
         const { data, message } = await res.json();
