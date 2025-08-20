@@ -1,6 +1,6 @@
 {
   "name": "medusa-plugin-localization",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "description": "Meudsa localization plugin, supports deepseek automatic translation",
   "author": "SummerFans (https://github.com/SummerFans)",
   "repository": {
