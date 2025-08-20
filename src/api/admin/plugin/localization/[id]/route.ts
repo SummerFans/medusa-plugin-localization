@@ -3,13 +3,14 @@ import { MedusaError } from "@medusajs/framework/utils";
 import updateProductMetadata from "../../../../../workflows/update-product-metadata";
 import generateProductMetadata from "../../../../../workflows/generate-product-metadata";
 import generateCollectionMetadata from "../../../../../workflows/generate-collection-metadata";
+import generateCategoriesMetadata from "../../../../../workflows/generate-categories-metadata";
+
 
 
 type LocalizationReq = {
   locale: string
   type: 'collection' | 'product' | 'categories'
 }
-
 
 export async function POST(req: MedusaRequest<LocalizationReq>, res: MedusaResponse) {
 
@@ -28,6 +29,18 @@ export async function POST(req: MedusaRequest<LocalizationReq>, res: MedusaRespo
     case 'collection':
       try {
         const { result } = await generateCollectionMetadata(req.scope).run({ input: { id, locale } })
+        return res.json({
+          data: result,
+        })
+      } catch (e) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `${e.message}`
+        )
+      }
+    case 'categories':
+      try {
+        const { result } = await generateCategoriesMetadata(req.scope).run({ input: { id, locale } })
         return res.json({
           data: result,
         })

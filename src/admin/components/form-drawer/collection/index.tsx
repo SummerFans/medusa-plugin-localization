@@ -12,10 +12,13 @@ declare const __BACKEND_URL__: string;
 const schema = zod.object({
   locale: zod.string(),
   title: zod.string(),
+  seo_title: zod.string(),
+  seo_description: zod.string(),
 })
 
-export default function CollectionFormDrawer({ reload }: { reload: () => void }) {
+export default function CollectionFormDrawer() {
 
+  const [open, setOpen] = useState(false);
   const dialog = usePrompt()
   const dialogRef = useRef<HTMLButtonElement>(null);
   const { id, type, currentLocale, translation, setMetadataLocale } = useLocalization();
@@ -25,12 +28,15 @@ export default function CollectionFormDrawer({ reload }: { reload: () => void })
   const form = useForm<zod.infer<typeof schema>>({
     defaultValues: {
       locale: currentLocale?.locale,
-      title: translation?.title || ''
+      title: translation?.title || '',
+      seo_description: translation.seo_description
     },
   })
 
   useEffect(() => {
     form.setValue('title', translation?.title)
+    form.setValue('seo_title', translation?.seo_title)
+    form.setValue('seo_description', translation?.seo_description)
   }, [translation])
 
 
@@ -58,10 +64,8 @@ export default function CollectionFormDrawer({ reload }: { reload: () => void })
         if (res.status !== 200) {
           return toast.error(message)
         }
-
         setMetadataLocale(data.metadata.locale)
-        reload();
-        dialogRef.current?.click()
+        setOpen(false)
       } catch (e: unknown) {
         setLoading(false)
         if (e instanceof Error) {
@@ -69,7 +73,6 @@ export default function CollectionFormDrawer({ reload }: { reload: () => void })
         }
       }
     }
-
   }
 
   const handleSubmit = form.handleSubmit(async (data) => {
@@ -81,15 +84,16 @@ export default function CollectionFormDrawer({ reload }: { reload: () => void })
     if (collection.metadata && collection.metadata?.locale) {
       try {
         const obj = JSON.parse(collection.metadata?.locale as string);
-        obj[data.locale] = { title: data.title };
+        obj[data.locale] = { title: data.title, seo_title: data.seo_title || '', seo_description: data.seo_description };
         collection.metadata.locale = JSON.stringify(obj);
 
         await sdk.admin.productCollection.update(id, {
           metadata: collection.metadata,
         })
+
+        setMetadataLocale(collection.metadata.locale as string)
         setLoading(false)
-        reload();
-        dialogRef.current?.click()
+        setOpen(false)
       } catch (e) {
         setLoading(false)
         if (e instanceof Error) {
@@ -103,7 +107,7 @@ export default function CollectionFormDrawer({ reload }: { reload: () => void })
 
   return (
     <div className="pl-2">
-      <Drawer>
+      <Drawer open={open} onOpenChange={() => setOpen(!open)}>
         <Drawer.Trigger asChild>
           <IconButton ref={dialogRef}>
             <PencilSquare />
@@ -131,6 +135,40 @@ export default function CollectionFormDrawer({ reload }: { reload: () => void })
                           <div className="flex items-center gap-x-1">
                             <Label size="small" weight="plus">
                               Title
+                            </Label>
+                          </div>
+                          <Input autoComplete="off" dir="auto" {...field} />
+                        </div>
+                      )
+                    }}
+                  />
+
+                  <Controller
+                    control={form.control}
+                    name="seo_title"
+                    render={({ field }) => {
+                      return (
+                        <div className="flex flex-col space-y-2">
+                          <div className="flex items-center gap-x-1">
+                            <Label size="small" weight="plus">
+                              Title (SEO)
+                            </Label>
+                          </div>
+                          <Input autoComplete="off" dir="auto" {...field} />
+                        </div>
+                      )
+                    }}
+                  />
+
+                  <Controller
+                    control={form.control}
+                    name="seo_description"
+                    render={({ field }) => {
+                      return (
+                        <div className="flex flex-col space-y-2">
+                          <div className="flex items-center gap-x-1">
+                            <Label size="small" weight="plus">
+                              Title (SEO)
                             </Label>
                           </div>
                           <Input autoComplete="off" dir="auto" {...field} />

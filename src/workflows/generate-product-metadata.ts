@@ -1,4 +1,4 @@
-import { MedusaError, Modules } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, MedusaError, Modules } from "@medusajs/framework/utils"
 import { ProductDTO } from '@medusajs/framework/types';
 import { createStep, createWorkflow, StepResponse, WorkflowResponse } from "@medusajs/framework/workflows-sdk"
 import { GenerateMetadataLocaleStepInput, UpdateProductMetadataWorkflowInput, UpdateProductMetadataStepInput } from "./types"
@@ -11,6 +11,7 @@ const generateMetadataLocale = createStep(
   'generate-metadata-locale',
   async ({ product, locale }: GenerateMetadataLocaleStepInput, { container }) => {
 
+    const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
     const deepseekModuleService: DeepSeekModuleService = container.resolve(DEEPSEEK_MODULE)
 
     if (deepseekModuleService.unavailable) {
@@ -30,14 +31,28 @@ const generateMetadataLocale = createStep(
       options.push(p);
     })
 
+
+    let seoData = {
+      title: '',
+      description: ''
+    }
+    if (product?.metadata?.seo) {
+      try {
+        seoData = JSON.parse(product?.metadata?.seo as string)
+      } catch (e) {
+        logger.error(`The format of the seo field in the metadata of the ${product.id} product is incorrect`)
+      }
+    }
+
     const data = {
       title: product.title || '',
+      seo_title: seoData.title || '',
       subtitle: product.subtitle || '',
       material: product.material || '',
       description: product.description || '',
+      seo_description: seoData.description || '',
       options,
     }
-
 
     const response = await deepseekModuleService.chat([{
       role: 'system',

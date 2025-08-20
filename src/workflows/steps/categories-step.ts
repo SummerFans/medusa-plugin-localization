@@ -6,7 +6,11 @@ export const getCategories = createStep(
   'get-categories-step',
   async ({ id }: { id: string }, { container }) => {
 
+    const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
+
     const productModuleService = container.resolve(Modules.PRODUCT)
+
+    logger.debug("[STEP] get-categories-step")
 
     const categories = await productModuleService.retrieveProductCategory(id, {
       relations: ['*']
@@ -20,6 +24,10 @@ export const getCategories = createStep(
 export const updateCategoriesMetadataLocale = createStep(
   'update-categories-metadata-step',
   async ({ id, metadata }: { id: string; metadata: any }, { container }) => {
+
+    const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
+
+    logger.debug('[STEP]: update-categories-metadata-step')
 
     const productModuleService = container.resolve(Modules.PRODUCT)
 

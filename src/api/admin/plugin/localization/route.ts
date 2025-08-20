@@ -1,5 +1,5 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
-import { MedusaError } from "@medusajs/framework/utils";
+import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils";
 import generateAllProductMetadata from "../../../../workflows/generate-all-product-metadata";
 import generateAllCollectionMetadata from "../../../../workflows/generate-all-collection-metadata";
 import generateAllCategoriesMetadata from "../../../../workflows/generate-all-categories-metadata";
@@ -7,6 +7,8 @@ import generateAllCategoriesMetadata from "../../../../workflows/generate-all-ca
 
 // POST /admin/plugin/localization?id=xxx
 export async function POST(req: MedusaRequest<{ id: string; locales: string[]; type: 'collection' | 'product' | 'categories' }>, res: MedusaResponse) {
+
+  const logger = req.scope.resolve(ContainerRegistrationKeys.LOGGER);
 
   const id = req.body.id as string;
   const type = req.body.type;
@@ -21,11 +23,15 @@ export async function POST(req: MedusaRequest<{ id: string; locales: string[]; t
   switch (type) {
     case 'collection':
       try {
+        logger.debug("start Collection metadata")
         const { result } = await generateAllCollectionMetadata(req.scope).run({ input: { id, locales } })
+
+        logger.debug("end Collection metadata")
         return res.json({
           data: result,
         })
       } catch (e) {
+        logger.debug("error Collection metadata")
         throw new MedusaError(
           MedusaError.Types.UNEXPECTED_STATE,
           `${e.message}`
@@ -45,6 +51,7 @@ export async function POST(req: MedusaRequest<{ id: string; locales: string[]; t
       }
     case 'categories':
       try {
+        logger.debug("API translte all categories")
         const { result } = await generateAllCategoriesMetadata(req.scope).run({ input: { id, locales } })
         return res.json({
           data: result,

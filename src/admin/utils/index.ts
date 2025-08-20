@@ -92,9 +92,11 @@ const convertingMetadataVal = (data: any): MatadataLocaleData => {
   const result: any = {
     [data.locale]: {
       title: data.title,
+      seo_title: data.seo_title,
       subtitle: data.subtitle,
       material: data.material,
       description: data.description,
+      seo_description: data.seo_description,
       options: [],
     },
   };

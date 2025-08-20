@@ -6,6 +6,10 @@ import Flag from 'react-country-flag'
 
 export default function SettingDrawer() {
 
+  const [loading, setLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+
   const dialog = usePrompt()
 
   const dialogRef = useRef<HTMLButtonElement>(null);
@@ -22,13 +26,18 @@ export default function SettingDrawer() {
     })
     if (confirm) {
       if (selected) {
-        changeDefaultLocale(selected);
+        if (await changeDefaultLocale(selected)) {
+          setIsOpen(false)
+          setLoading(false)
+        } else {
+          setLoading(false)
+        }
       }
     }
   }
 
   return (
-    <Drawer>
+    <Drawer open={isOpen} onOpenChange={setIsOpen}>
       <Drawer.Trigger asChild>
         <IconButton variant="transparent" className="ml-2" ref={dialogRef}>
           <Adjustments />
@@ -42,7 +51,6 @@ export default function SettingDrawer() {
         <Drawer.Body>
           <h2 className="py-6">Select default national language</h2>
           <RadioGroup defaultValue={defaultLocale} onValueChange={(v) => setSelected(v)} className="grid grid-cols-4 gap-4 py-4">
-
             {countries && countries.map(c => (
               <div key={c.code} className="flex items-center gap-x-3">
                 <RadioGroup.Item value={c.locale} id={`radio_${c.code}`} />
@@ -56,9 +64,9 @@ export default function SettingDrawer() {
         <Drawer.Footer>
           <div className="flex w-full">
             <div className='flex flex-1 flex-row-reverse' >
-              <Button className="ml-4" onClick={changeDefaultLocaleHandle}>Save</Button>
+              <Button className="ml-4" isLoading={loading} onClick={changeDefaultLocaleHandle}>Save</Button>
               <Drawer.Close asChild>
-                <Button variant="secondary">Cancel</Button>
+                <Button variant="secondary" isLoading={loading} >Cancel</Button>
               </Drawer.Close>
             </div>
           </div>

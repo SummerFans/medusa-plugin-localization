@@ -21,6 +21,11 @@ const ProductTable = ({ translation }: any) => {
         </Table.Row>
 
         <Table.Row>
+          <Table.Cell>Title (SEO)</Table.Cell>
+          <Table.Cell className="py-2" dir="auto">{translation.seo_title}</Table.Cell>
+        </Table.Row>
+
+        <Table.Row>
           <Table.Cell>Subtitle</Table.Cell>
           <Table.Cell className="py-2" dir="auto">{translation.subtitle}</Table.Cell>
         </Table.Row>
@@ -29,6 +34,12 @@ const ProductTable = ({ translation }: any) => {
           <Table.Cell>Description</Table.Cell>
           <Table.Cell className="py-2" dir="auto">{translation.description}</Table.Cell>
         </Table.Row>
+
+        <Table.Row>
+          <Table.Cell>Description (SEO)</Table.Cell>
+          <Table.Cell className="py-2" dir="auto">{translation.seo_description}</Table.Cell>
+        </Table.Row>
+
 
         <Table.Row>
           <Table.Cell>Material</Table.Cell>
@@ -65,6 +76,16 @@ const CollectionTable = ({ translation }: any) => {
           <Table.Cell>Title</Table.Cell>
           <Table.Cell className="py-2" >{translation.title}</Table.Cell>
         </Table.Row>
+
+        <Table.Row>
+          <Table.Cell>Title(SEO)</Table.Cell>
+          <Table.Cell className="py-2" >{translation.seo_title}</Table.Cell>
+        </Table.Row>
+
+        <Table.Row>
+          <Table.Cell>Description(SEO)</Table.Cell>
+          <Table.Cell className="py-2" >{translation.seo_description}</Table.Cell>
+        </Table.Row>
       </Table.Body>
     </Table>
 
@@ -88,8 +109,19 @@ const CategoriesTable = ({ translation }: any) => {
         </Table.Row>
 
         <Table.Row>
+          <Table.Cell>Name(SEO)</Table.Cell>
+          <Table.Cell className="py-2">{translation.seo_name}</Table.Cell>
+        </Table.Row>
+
+
+        <Table.Row>
           <Table.Cell>Description</Table.Cell>
           <Table.Cell className="py-2">{translation.description}</Table.Cell>
+        </Table.Row>
+
+        <Table.Row>
+          <Table.Cell>Description(SEO)</Table.Cell>
+          <Table.Cell className="py-2">{translation.seo_description}</Table.Cell>
         </Table.Row>
       </Table.Body>
     </Table>

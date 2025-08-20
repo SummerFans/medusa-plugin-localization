@@ -1,16 +1,15 @@
-import Cookies from 'js-cookie'
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useQuery } from "@tanstack/react-query"
 import { sdk } from '../../lib/sdk';
 import { countries as countriesList, localeTransform } from '../../utils'
 import { AdminProductOption } from '@medusajs/framework/types';
+import { toast } from '@medusajs/ui';
 
-const DEFAULT_COOKIE_NAME = '_default_locale';
-
+declare const __BACKEND_URL__: string;
 interface LocaleContext {
   type: 'collection' | 'categories' | 'product';
   defaultLocale: string | undefined;
-  changeDefaultLocale: (locale: string) => void;
+  changeDefaultLocale: (locale: string) => Promise<boolean>;
   id: string;
   metadataLocale: any;
   source: string | null;
@@ -21,6 +20,47 @@ interface LocaleContext {
   changeLocale: (locale: string) => void
   setMetadataLocale: (locale: string) => void;
 }
+
+const updateCurrentLocaleCode = async (localeCode: string) => {
+  const res = await fetch(`${__BACKEND_URL__ || ''}/admin/plugin/localization/current`, {
+    method: 'PUT',
+    credentials: 'include',
+    headers: {
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      locale_code: localeCode
+    })
+  })
+
+  try {
+    return await res.json();
+  } catch (e: any) {
+    toast.error("Error", {
+      description: e.message,
+    })
+  }
+}
+
+const getCurrentLocaleCode = async () => {
+  const res = await fetch(`${__BACKEND_URL__ || ''}/admin/plugin/localization/current`, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      "content-type": "application/json"
+    }
+  })
+
+  try {
+    const data = await res.json();
+    return data;
+  } catch (e) {
+    console.error(e);
+    return {}
+  }
+
+}
+
 
 const LocalizationContext = createContext<LocaleContext>({
   type: 'product',
@@ -38,7 +78,7 @@ const LocalizationContext = createContext<LocaleContext>({
   metadataLocale: {},
   changeLocale: () => { },
   setMetadataLocale: () => { },
-  changeDefaultLocale: () => { },
+  changeDefaultLocale: () => Promise.resolve().then(() => true),
   options: [],
 })
 
@@ -65,26 +105,44 @@ export const LocalizationProvider = ({
   options
 }: LocalizationProviderProps) => {
 
-  const [defaultLocale, setDefaultLocale] = useState<string | undefined>(Cookies.get(DEFAULT_COOKIE_NAME));
 
+  const [defaultLocale, setDefaultLocale] = useState<string | undefined>('');
   const [metadataLocale, setMetadataLocale] = useState(source)
   const [sourceLocale, setSourceLocale] = useState(localeTransform(metadataLocale));
 
   const [translation, setTranslation] = useState<Record<string, never>>({})
   const [currentLocale, setCurrentLocale] = useState<Countrie | null>(null);
 
-  const { data: queryResult } = useQuery({
-    queryFn: () => sdk.admin.region.list({}),
-    queryKey: []
+  const { data: countriesCodes } = useQuery({
+    queryFn: () => sdk.admin.region.list({}).then(({ regions }) => regions.map((region) => region.countries?.map((countrie) => countrie.iso_2)).flat(2)),
+    queryKey: ['countrie', 'all']
   })
 
-  const countryCodes: string[] = []
-  queryResult?.regions.map(region => region.countries?.map(countrie => countryCodes.push(countrie.iso_2 as string)))
+  // 使用 useQuery 替换所有手动的 useState 和 useEffect 逻辑
+  const {
+    data: localeCode
+  } = useQuery<any, Error>({
+    queryKey: ['current_locale'],   // 数据的唯一缓存键
+    queryFn: getCurrentLocaleCode,  // 数据获取函数
+  });
 
-  let countries = countryCodes.sort((a, b) => b.localeCompare(a)).map(c => {
+  // 使用 useMemo 优化 value 对象，防止不必要的重渲染
+  // 只有当 useQuery 返回的值变化时，value 对象才会重新创建
+
+  // const value = useMemo(() => ({
+  //   localeCode,
+  //   isLoading,
+  //   error,
+  //   refetch,
+  // }), [localeCode, isLoading, error, refetch]);
+
+
+  const countryCodes: string[] = (countriesCodes as any) || []
+
+  let countries = countryCodes?.sort((a, b) => b.localeCompare(a)).map(c => {
     let data = countriesList[c] as any;
 
-    data.isExist = sourceLocale[countriesList[c].locale] && true
+    data.isExist = sourceLocale[countriesList[c].locale] ? true : false
 
     // 选择初始语言
     if (!currentLocale) {
@@ -99,10 +157,12 @@ export const LocalizationProvider = ({
     }
   });
 
+
   // 改变默认基本语言
-  const changeDefaultLocale = (locale: string) => {
-    Cookies.set(DEFAULT_COOKIE_NAME, locale);
+  const changeDefaultLocale = async (locale: string): Promise<boolean> => {
+    await updateCurrentLocaleCode(locale)
     setDefaultLocale(locale)
+    return true
   }
 
   // 切换语言
@@ -116,14 +176,33 @@ export const LocalizationProvider = ({
     setTranslation(sourceLocale[selectCountry.locale] as Record<string, never> || null);
   }
 
+
+  // const fetchData = useCallback(async () => {
+  //   setLoading(true);
+  //   setError(null);
+  //   try {
+  //     const data = await fetchUserData();
+  //     setUser(data);
+  //   } catch (err) {
+  //     setError(err.message);
+  //     setUser(null); // 清除旧数据
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }, []);
+
+
   useEffect(() => {
+    setDefaultLocale(localeCode?.locale_code);
+
+
     setSourceLocale(localeTransform(metadataLocale))
     // initializeLocale();
     if (currentLocale) {
       setTranslation(localeTransform(metadataLocale)[currentLocale?.locale] as any)
     }
 
-  }, [metadataLocale])
+  }, [metadataLocale, localeCode])
 
   return (
     <LocalizationContext.Provider value={{ options, metadataLocale, defaultLocale, type, changeDefaultLocale, id, source, currentLocale, changeLocale, setMetadataLocale, countries, translation }}>{children}</LocalizationContext.Provider>

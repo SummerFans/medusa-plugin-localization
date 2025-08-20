@@ -1,5 +1,6 @@
 import { useLocalization } from "../../context/locale-context";
 import CollectionFormDrawer from "./collection";
+import CategoriesFormDrawer from "./categories";
 import ProductFormDrawer from "./product";
 
 export default function FormDrawer({ reload }: { reload: () => void }) {
@@ -11,6 +12,8 @@ export default function FormDrawer({ reload }: { reload: () => void }) {
       return <ProductFormDrawer reload={reload} />
     case 'collection':
       return <CollectionFormDrawer reload={reload} />
+    case 'categories':
+      return <CategoriesFormDrawer/>
   }
 
 }

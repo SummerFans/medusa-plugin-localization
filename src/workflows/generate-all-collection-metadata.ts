@@ -1,4 +1,4 @@
-import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, MedusaError, Modules } from "@medusajs/framework/utils"
 import { ProductCollectionDTO } from '@medusajs/framework/types';
 import { createStep, createWorkflow, StepResponse, WorkflowResponse } from "@medusajs/framework/workflows-sdk"
 import { DEEPSEEK_MODULE } from "../modules/deepseek";
@@ -9,6 +9,7 @@ const generateAllMetadataLocale = createStep(
   'generate-all-collection-metadata-locale',
   async ({ collection, locales }: { collection: ProductCollectionDTO, locales: string[] }, { container }) => {
 
+    const cacheModuleService = container.resolve(Modules.CACHE)
     const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
     const deepseekModuleService: DeepSeekModuleService = container.resolve(DEEPSEEK_MODULE)
 
@@ -16,8 +17,27 @@ const generateAllMetadataLocale = createStep(
       throw new MedusaError(MedusaError.Types.INVALID_ARGUMENT, 'The api_key parameter is missing, and the deepseek service cannot be used.');
     }
 
+    const currentLocaleCode = cacheModuleService.get('LOCALE_CODE_COOKIE')
+    if (!currentLocaleCode) {
+      throw new MedusaError(MedusaError.Types.INVALID_ARGUMENT, 'The default language does not exist');
+    }
+
+    let seoData = {
+      title: '',
+      description: '',
+    }
+    if (collection?.metadata?.seo) {
+      try {
+        seoData = JSON.parse(collection?.metadata?.seo as string)
+      } catch (e) {
+        logger.error(`The format of the seo field in the metadata of the ${collection.id} product is incorrect`)
+      }
+    }
+
     const data = {
-      title: collection.title
+      title: collection.title,
+      seo_title: seoData.title,
+      seo_description: seoData.description
     }
 
     const startDate = new Date()
@@ -37,7 +57,7 @@ const generateAllMetadataLocale = createStep(
 
     const responseData = JSON.parse(response.choices[0].message.content) as { [locale: string]: Record<string, never> };
 
-    const metadata = collection?.metadata || {};
+    let metadata = collection?.metadata || {};
 
     if (collection?.metadata?.locale) {
       try {
@@ -46,6 +66,7 @@ const generateAllMetadataLocale = createStep(
           localeObj[locale as string] = responseData[locale];
         })
         metadata.locale = JSON.stringify(localeObj);
+        logger.debug(JSON.stringify(metadata))
       } catch (e) {
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
@@ -69,6 +90,7 @@ const generateAllCollectionMetadata = createWorkflow(
 
     // step 2 generate metadata
     const metadata = generateAllMetadataLocale({ collection, locales })
+
 
     // step 3 update product metadata
     return new WorkflowResponse(updateCollectionMetadataLocale({

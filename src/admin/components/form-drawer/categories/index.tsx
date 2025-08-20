@@ -11,11 +11,15 @@ declare const __BACKEND_URL__: string;
 
 const schema = zod.object({
   locale: zod.string(),
-  title: zod.string(),
-  description: zod.string()
+  name: zod.string(),
+  seo_name: zod.string(),
+  description: zod.string(),
+  seo_description: zod.string()
 })
 
 export default function CategoriesFormDrawer() {
+
+  const [open, setOpen] = useState(false);
 
   const dialog = usePrompt()
   const dialogRef = useRef<HTMLButtonElement>(null);
@@ -23,17 +27,22 @@ export default function CategoriesFormDrawer() {
 
   const [loading, setLoading] = useState(false);
 
+
   const form = useForm<zod.infer<typeof schema>>({
     defaultValues: {
       locale: currentLocale?.locale,
-      title: translation?.title || '',
-      description: translation?.description || ''
+      name: translation?.name || '',
+      seo_name: translation?.seo_name || '',
+      description: translation?.description || '',
+      seo_description: translation?.seo_description || '',
     },
   })
 
   useEffect(() => {
-    form.setValue('title', translation?.title)
+    form.setValue('name', translation?.name)
+    form.setValue('seo_name', translation?.seo_name)
     form.setValue('description', translation?.description)
+    form.setValue('seo_description', translation?.seo_description)
   }, [translation])
 
 
@@ -77,20 +86,22 @@ export default function CategoriesFormDrawer() {
   const handleSubmit = form.handleSubmit(async (data) => {
     data.locale = currentLocale?.locale as string;
     let newLocale: any = {}
-    newLocale[data.locale] = data.title;
+    newLocale[data.locale] = data.name;
     setLoading(true)
-    const { collection } = await sdk.admin.productCollection.retrieve(id);
-    if (collection.metadata && collection.metadata?.locale) {
+    const { product_category: category } = await sdk.admin.productCategory.retrieve(id);
+    if (category.metadata && category.metadata?.locale) {
       try {
-        const obj = JSON.parse(collection.metadata?.locale as string);
-        obj[data.locale] = { title: data.title, description: data.description };
-        collection.metadata.locale = JSON.stringify(obj);
+        const obj = JSON.parse(category.metadata?.locale as string);
+        obj[data.locale] = { name: data.name, description: data.description, seo_name: data.seo_name, seo_description: data.seo_description };
+        category.metadata.locale = JSON.stringify(obj);
 
-        await sdk.admin.productCollection.update(id, {
-          metadata: collection.metadata,
+        const { product_category } = await sdk.admin.productCategory.update(id, {
+          metadata: category.metadata,
         })
+
+        setMetadataLocale(product_category.metadata?.locale as string)
         setLoading(false)
-        dialogRef.current?.click()
+        setOpen(false);
       } catch (e) {
         setLoading(false)
         if (e instanceof Error) {
@@ -104,7 +115,7 @@ export default function CategoriesFormDrawer() {
 
   return (
     <div className="pl-2">
-      <Drawer>
+      <Drawer open={open} onOpenChange={() => setOpen(!open)}>
         <Drawer.Trigger asChild>
           <IconButton ref={dialogRef}>
             <PencilSquare />
@@ -125,13 +136,65 @@ export default function CategoriesFormDrawer() {
                 <div className="flex flex-col gap-4">
                   <Controller
                     control={form.control}
-                    name="title"
+                    name="name"
                     render={({ field }) => {
                       return (
                         <div className="flex flex-col space-y-2">
                           <div className="flex items-center gap-x-1">
                             <Label size="small" weight="plus">
-                              Title
+                              Name
+                            </Label>
+                          </div>
+                          <Input autoComplete="off" dir="auto" {...field} />
+                        </div>
+                      )
+                    }}
+                  />
+
+
+                  <Controller
+                    control={form.control}
+                    name="seo_name"
+                    render={({ field }) => {
+                      return (
+                        <div className="flex flex-col space-y-2">
+                          <div className="flex items-center gap-x-1">
+                            <Label size="small" weight="plus">
+                              Name (SEO)
+                            </Label>
+                          </div>
+                          <Input autoComplete="off" dir="auto" {...field} />
+                        </div>
+                      )
+                    }}
+                  />
+
+                  <Controller
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => {
+                      return (
+                        <div className="flex flex-col space-y-2">
+                          <div className="flex items-center gap-x-1">
+                            <Label size="small" weight="plus">
+                              Description
+                            </Label>
+                          </div>
+                          <Input autoComplete="off" dir="auto" {...field} />
+                        </div>
+                      )
+                    }}
+                  />
+
+                  <Controller
+                    control={form.control}
+                    name="seo_description"
+                    render={({ field }) => {
+                      return (
+                        <div className="flex flex-col space-y-2">
+                          <div className="flex items-center gap-x-1">
+                            <Label size="small" weight="plus">
+                              Description(SEO)
                             </Label>
                           </div>
                           <Input autoComplete="off" dir="auto" {...field} />
@@ -140,6 +203,7 @@ export default function CategoriesFormDrawer() {
                     }}
                   />
                 </div>
+
 
               </Drawer.Body>
               <Drawer.Footer>

@@ -12,13 +12,17 @@ declare const __BACKEND_URL__: string;
 const schema = zod.object({
   locale: zod.string(),
   title: zod.string(),
+  seo_title: zod.string(),
   subtitle: zod.string(),
   description: zod.string(),
+  seo_description: zod.string(),
   material: zod.string(),
   options: zod.any(),
 })
 
-export default function ProductFormDrawer({ reload }: { reload: () => void }) {
+export default function ProductFormDrawer() {
+
+  const [open, setOpen] = useState(false);
 
   const dialog = usePrompt()
 
@@ -32,11 +36,13 @@ export default function ProductFormDrawer({ reload }: { reload: () => void }) {
     defaultValues: {
       locale: currentLocale?.locale,
       title: translation?.title,
+      seo_title: translation?.seo_title,
       subtitle: translation?.subtitle,
       description: translation?.description,
+      seo_description: translation?.seo_description,
       material: translation?.material,
       options: optionsTransform(options, translation?.options),
-    },
+    }
   })
 
   const { fields } = useFieldArray({
@@ -68,8 +74,7 @@ export default function ProductFormDrawer({ reload }: { reload: () => void }) {
           return toast.error(message)
         }
         setMetadataLocale(data.metadata.locale)
-        reload();
-        dialogRef.current?.click()
+        setOpen(false)
       } catch (e: unknown) {
         setLoading(false)
         if (e instanceof Error) {
@@ -94,8 +99,7 @@ export default function ProductFormDrawer({ reload }: { reload: () => void }) {
     const jsonData = await res.json();
     setMetadataLocale(jsonData.data.metadata.locale)
     setLoading(false)
-    reload();
-    dialogRef.current?.click()
+    setOpen(false)
 
   })
 
@@ -105,8 +109,10 @@ export default function ProductFormDrawer({ reload }: { reload: () => void }) {
       form.reset({
         locale: currentLocale?.locale || '',
         title: translation?.title || '',
+        seo_title: translation?.seo_title || '',
         subtitle: translation?.subtitle || '',
         description: translation?.description || '',
+        seo_description: translation?.seo_description || '',
         material: translation?.material || '',
         options: optionsTransform(options, translation?.options),
       })
@@ -124,7 +130,7 @@ export default function ProductFormDrawer({ reload }: { reload: () => void }) {
 
   return (
     <div className="pl-2">
-      <Drawer>
+      <Drawer open={open} onOpenChange={()=>setOpen(!open)}>
         <Drawer.Trigger asChild>
           <IconButton ref={dialogRef}>
             <PencilSquare />
@@ -140,8 +146,7 @@ export default function ProductFormDrawer({ reload }: { reload: () => void }) {
               <Drawer.Header>
                 <Drawer.Title>Edit Localization <Badge size="xsmall" color="green">{currentLocale?.country}</Badge></Drawer.Title>
               </Drawer.Header>
-              <Drawer.Body className="p-4">
-
+              <Drawer.Body className="p-4 overflow-auto">
                 <div className="flex flex-col gap-4">
                   <Controller
                     control={form.control}
@@ -152,6 +157,23 @@ export default function ProductFormDrawer({ reload }: { reload: () => void }) {
                           <div className="flex items-center gap-x-1">
                             <Label size="small" weight="plus">
                               Title
+                            </Label>
+                          </div>
+                          <Input autoComplete="off" dir="auto" {...field} />
+                        </div>
+                      )
+                    }}
+                  />
+
+                  <Controller
+                    control={form.control}
+                    name="seo_title"
+                    render={({ field }) => {
+                      return (
+                        <div className="flex flex-col space-y-2">
+                          <div className="flex items-center gap-x-1">
+                            <Label size="small" weight="plus">
+                              Title (SEO)
                             </Label>
                           </div>
                           <Input autoComplete="off" dir="auto" {...field} />
@@ -210,6 +232,23 @@ export default function ProductFormDrawer({ reload }: { reload: () => void }) {
                     }}
                   />
 
+                  <Controller
+                    control={form.control}
+                    name="seo_description"
+                    render={({ field }) => {
+                      return (
+                        <div className="flex flex-col space-y-2">
+                          <div className="flex items-center gap-x-1">
+                            <Label size="small" weight="plus">
+                              Description(SEO)
+                            </Label>
+                          </div>
+                          <Textarea autoComplete="off" dir="auto" className="h-32" {...field} />
+                        </div>
+                      )
+                    }}
+                  />
+
                   <h2 className="font-bold">Options</h2>
                   {/* options */}
                   {fields.map((option: any, index: number) => (
@@ -253,7 +292,6 @@ export default function ProductFormDrawer({ reload }: { reload: () => void }) {
                     </div>
                   ))}
                 </div>
-
               </Drawer.Body>
               <Drawer.Footer>
                 <div className="flex w-full">

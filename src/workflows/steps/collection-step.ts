@@ -1,4 +1,4 @@
-import { Modules } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { ProductCollectionDTO } from '@medusajs/framework/types';
 import { createStep, StepResponse } from "@medusajs/framework/workflows-sdk"
 
@@ -19,12 +19,14 @@ export const updateCollectionMetadataLocale = createStep(
   'update-collection-metadata-step',
   async ({ id, metadata }: { id: string; metadata: any }, { container }) => {
 
-    const productModuleService = container.resolve(Modules.PRODUCT)
+    const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
 
-    const collection = await productModuleService.updateProductCollections(id, {
+    logger.debug('[STEP] update-collection-metadata-step')
+    const productModuleService = container.resolve(Modules.PRODUCT)
+    await productModuleService.updateProductCollections(id, {
       metadata
     })
-
-    return new StepResponse<ProductCollectionDTO>(collection)
+    
+    return new StepResponse<ProductCollectionDTO>(await productModuleService.retrieveProductCollection(id))
   }
 )

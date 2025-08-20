@@ -1,4 +1,4 @@
-import { MedusaError } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
 import { createStep, createWorkflow, StepResponse, WorkflowResponse } from "@medusajs/framework/workflows-sdk"
 import { UpdateProductMetadataWorkflowInput } from "./types"
 import { DEEPSEEK_MODULE } from "../modules/deepseek";
@@ -10,14 +10,29 @@ const generateCollectionMetadataLocale = createStep(
   'generate-collection-metadata-locale',
   async ({ collection, locale }: any, { container }) => {
 
+    const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
     const deepseekModuleService: DeepSeekModuleService = container.resolve(DEEPSEEK_MODULE)
 
     if (deepseekModuleService.unavailable) {
       throw new MedusaError(MedusaError.Types.INVALID_ARGUMENT, 'The api_key parameter is missing, and the deepseek service cannot be used.');
     }
 
+    let seoData = {
+      title: '',
+      description: ''
+    }
+    if (collection?.metadata?.seo) {
+      try {
+        seoData = JSON.parse(collection?.metadata?.seo as string)
+      } catch (e) {
+        logger.error(`The format of the seo field in the metadata of the ${collection.id} product is incorrect`)
+      }
+    }
+
     const data: any = {
-      title: collection.title
+      title: collection.title,
+      seo_title: seoData.title,
+      seo_description: seoData.description
     }
 
 

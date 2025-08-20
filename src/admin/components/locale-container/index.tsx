@@ -26,7 +26,7 @@ export default function LocaleContainer() {
         <div className="flex">
           {defaultLocale && (
             <>
-              <TranslationDrawer reload={reload} />
+              <TranslationDrawer />
               <LocaleSwitch />
               <FormDrawer reload={reload} />
             </>

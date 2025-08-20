@@ -1,28 +1,19 @@
-import { ContainerRegistrationKeys, MedusaError, Module, Modules } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
 import { ProductCategoryDTO } from '@medusajs/framework/types';
 import { createStep, createWorkflow, StepResponse, WorkflowResponse } from "@medusajs/framework/workflows-sdk"
 import { DEEPSEEK_MODULE } from "../modules/deepseek";
 import DeepSeekModuleService from "../modules/deepseek/service";
 import { getCategories, updateCategoriesMetadataLocale } from "./steps/categories-step";
 
-const generateAllCategoriesMetadataLocale = createStep(
+const generateCategoriesMetadataLocale = createStep(
   'generate-all-categories-metadata-locale',
-  async ({ categories, locales }: { categories: ProductCategoryDTO, locales: string[] }, { container }) => {
+  async ({ categories, locale }: { categories: ProductCategoryDTO, locale: string }, { container }) => {
 
     const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
-
-    logger.debug("[STEP] generate-all-categories-metadata-locale")
-
-    const cacheModuleService = container.resolve(Modules.CACHE)
     const deepseekModuleService: DeepSeekModuleService = container.resolve(DEEPSEEK_MODULE)
 
     if (deepseekModuleService.unavailable) {
       throw new MedusaError(MedusaError.Types.INVALID_ARGUMENT, 'The api_key parameter is missing, and the deepseek service cannot be used.');
-    }
-
-    const currentLocaleCode = cacheModuleService.get('LOCALE_CODE_COOKIE')
-    if (!currentLocaleCode) {
-      throw new MedusaError(MedusaError.Types.INVALID_ARGUMENT, 'The default language does not exist');
     }
 
     let seoData = {
@@ -44,38 +35,29 @@ const generateAllCategoriesMetadataLocale = createStep(
       seo_description: seoData.description,
     }
 
-    logger.debug("Translation Content")
-    logger.debug(JSON.stringify(data))
-
     const startDate = new Date()
     const response = await deepseekModuleService.chat([{
       role: 'system',
       content: `You are a professional multilingual translation assistant. Your core task is to deliver accurate and fluent translations while preserving the original text’s meaning, style, and cultural context. returns the same json format`
     }, {
       role: 'user',
-      content: `Translate ${JSON.stringify(data)} JSON value into multiple languages such as ${locales?.join(',')} and return it according to the example format.
-      Return to Example format:{'en-US':{"name":"","description":""},"ja-JP":{...}}
-      `
+      content: `Translate the ${JSON.stringify(data)} JSON value to ${locale} language`
     }]);
 
     const endDate = new Date();
-    logger.debug("===== DEEPSEEK TIME ========")
     logger.debug(((endDate.getTime() - startDate.getTime()) / 1000).toFixed(2))
 
     const responseData = JSON.parse(response.choices[0].message.content) as { [locale: string]: Record<string, never> };
 
-    let metadata = categories?.metadata || {};
+    const metadata = categories?.metadata || {};
 
     if (categories?.metadata?.locale) {
       try {
         const localeObj = JSON.parse(categories?.metadata?.locale as string);
-        locales?.map(locale => {
-          localeObj[locale as string] = responseData[locale];
-        })
+        localeObj[locale as string] = responseData;
+
         metadata.locale = JSON.stringify(localeObj);
-        logger.debug(JSON.stringify(metadata))
       } catch (e) {
-        // Cannot read properties of undefined (reading 'metadata')
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
           `${e.message}`
@@ -85,19 +67,21 @@ const generateAllCategoriesMetadataLocale = createStep(
       // metadata不存在locale
       metadata.locale = JSON.stringify(responseData);
     }
-    return new StepResponse<Record<string, unknown>>(metadata as any)
+
+    
+    return new StepResponse<Record<string, unknown>>(metadata)
   }
 )
 
-const generateAllCategoriesMetadata = createWorkflow(
-  "generate-all-categories-metadata-workflow",
-  function ({ id, locales }: { id: string; locales: string[] }) {
+const generateCategoriesMetadata = createWorkflow(
+  "generate-categories-metadata-workflow",
+  function ({ id, locale }: { id: string; locale: string }) {
 
     // step 1 getProduct
     const categories = getCategories({ id })
 
     // step 2 generate metadata
-    const metadata = generateAllCategoriesMetadataLocale({ categories, locales })
+    const metadata = generateCategoriesMetadataLocale({ categories, locale })
 
     // step 3 update product metadata
     return new WorkflowResponse(updateCategoriesMetadataLocale({
@@ -108,4 +92,4 @@ const generateAllCategoriesMetadata = createWorkflow(
 )
 
 
-export default generateAllCategoriesMetadata;
+export default generateCategoriesMetadata;

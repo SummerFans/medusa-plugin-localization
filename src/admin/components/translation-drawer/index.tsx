@@ -1,5 +1,5 @@
 import { Button, Checkbox, clx, Drawer, Heading, IconButton, Label, StatusBadge, toast, usePrompt } from "@medusajs/ui";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import DeepseekIcon from "../../icons/deepseek";
 import { useLocalization } from "../../context/locale-context";
 import Flag from 'react-country-flag'
@@ -7,12 +7,12 @@ import Flag from 'react-country-flag'
 declare const __BACKEND_URL__: string;
 
 
-export default function TranslationDrawer({ reload }: { reload: () => void }) {
+export default function TranslationDrawer() {
 
   const dialog = usePrompt();
-  const dialogRef = useRef<HTMLButtonElement>(null);
   const { id, type, countries, defaultLocale, setMetadataLocale } = useLocalization()
 
+  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
 
@@ -29,8 +29,7 @@ export default function TranslationDrawer({ reload }: { reload: () => void }) {
 
   }
 
-  const translationHandle = async (e: any) => {
-    e.stopPropagation();
+  const translationHandle = async () => {
     const confirm = await dialog({
       title: "Are you sure?",
       description: `Are you sure you can translate into ${selected.length} languages?`
@@ -44,17 +43,19 @@ export default function TranslationDrawer({ reload }: { reload: () => void }) {
           headers: {
             "content-type": "application/json"
           },
+          signal: AbortSignal.timeout(120000),
           body: JSON.stringify({ id, locales: selected, type })
         })
 
+        // 没有返回数据
         const { message, data } = await res.json();
         setLoading(false)
         if (res.status !== 200) {
           return toast.error(message)
         }
+
         setMetadataLocale(data.metadata.locale)
-        dialogRef.current?.click()
-        reload();
+        setOpen(false);
       } catch (e: unknown) {
         setLoading(false)
         if (e instanceof Error) {
@@ -76,13 +77,15 @@ export default function TranslationDrawer({ reload }: { reload: () => void }) {
   }, [countries])
 
   return (
-    <Drawer>
+    <Drawer open={open} onOpenChange={()=>setOpen(!open)}>
       <Drawer.Trigger asChild>
-        <IconButton variant="transparent" className="mr-2" ref={dialogRef}>
+        <IconButton variant="transparent" className="mr-2">
           <DeepseekIcon />
         </IconButton>
       </Drawer.Trigger>
-      <Drawer.Content>
+      <Drawer.Content onInteractOutside={(e)=>{
+        e.preventDefault()
+      }} >
         <Drawer.Description></Drawer.Description>
         <Drawer.Header>
           <Drawer.Title>Translation</Drawer.Title>
