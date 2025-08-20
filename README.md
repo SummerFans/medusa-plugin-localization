@@ -18,6 +18,16 @@ The `medusa-plugin-localization` is a localization plugin for Medusa v2. The plu
 npm i medusa-plugin-localization
 ```
 
+### Metadata struct
+If an SEO section is added to the metadata, DeepSeek's API will automatically include it in the multilingual translation process
+
+| name   | value                                       | description                                           |
+| ------ | ------------------------------------------- | ----------------------------------------------------- |
+| seo    | {"title":"xxx","description":"xxx"}         | for page keyword optimization                         |
+| locale | {"en-GB":{"title":"...","seo_title":"..."}} | multiple languages ​​via deepseek or manually written |
+
+
+
 ### medusa-config.js
 
 ```
