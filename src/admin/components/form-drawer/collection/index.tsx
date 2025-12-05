@@ -101,7 +101,6 @@ export default function CollectionFormDrawer() {
         }
       }
     }
-
   })
 
 
@@ -168,7 +167,7 @@ export default function CollectionFormDrawer() {
                         <div className="flex flex-col space-y-2">
                           <div className="flex items-center gap-x-1">
                             <Label size="small" weight="plus">
-                              Title (SEO)
+                              Description (SEO)
                             </Label>
                           </div>
                           <Input autoComplete="off" dir="auto" {...field} />
